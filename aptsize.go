@@ -14,6 +14,10 @@ type measurement struct {
 	inches int
 }
 
+func (m measurement) String() string {
+	return fmt.Sprintf("[ F: %d, I: %d ]", m.feet, m.inches)
+}
+
 func newMeasurementFromString(desc string) (measurement, error) {
 	m := measurement{}
 	parts := strings.Split(desc, "-")
@@ -41,6 +45,13 @@ func newMeasurementFromInches(inches int) measurement {
 	return m
 }
 
+func newMeasurementFromSquareInches(inches int) measurement {
+	m := measurement{}
+	m.feet = inches / 144
+	m.inches = inches % 144
+	return m
+}
+
 func (m measurement) totalInches() int {
 	return 12*m.feet + m.inches
 }
@@ -50,12 +61,12 @@ type roomSize struct {
 	width  measurement
 }
 
-func (r roomSize) sizeInInches() int {
-	return r.height.totalInches() * r.width.totalInches()
+func (r roomSize) String() string {
+	return fmt.Sprintf("[ %s %s ]", r.width, r.height)
 }
 
-func (r roomSize) size() measurement {
-	return newMeasurementFromInches(r.sizeInInches())
+func (r roomSize) size() int {
+	return r.height.totalInches() * r.width.totalInches()
 }
 
 func parseLine(line string) (roomSize, error) {
@@ -81,9 +92,10 @@ func parseLine(line string) (roomSize, error) {
 func getTotalSize(rooms []roomSize) measurement {
 	totalInches := 0
 	for _, r := range rooms {
-		totalInches += r.sizeInInches()
+		fmt.Printf("room: %s\n", r)
+		totalInches += r.size()
 	}
-	return newMeasurementFromInches(totalInches)
+	return newMeasurementFromSquareInches(totalInches)
 }
 
 func main() {
@@ -107,5 +119,5 @@ func main() {
 	}
 
 	totalSize := getTotalSize(rooms)
-	fmt.Printf("Total Size: Feet: %d Inches: %d\n", totalSize.feet, totalSize.inches)
+	fmt.Printf("Total Size (sqft): %s\n", totalSize)
 }
