@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+type distance int
+type area int
+
 type measurement struct {
 	feet   int
 	inches int
@@ -38,22 +41,22 @@ func newMeasurementFromString(desc string) (measurement, error) {
 	return m, nil
 }
 
-func newMeasurementFromInches(inches int) measurement {
+func newMeasurementFromInches(inches distance) measurement {
 	m := measurement{}
-	m.feet = inches / 12
-	m.inches = inches % 12
+	m.feet = int(inches) / 12
+	m.inches = int(inches) % 12
 	return m
 }
 
-func newMeasurementFromSquareInches(inches int) measurement {
+func newMeasurementFromSquareInches(inches area) measurement {
 	m := measurement{}
-	m.feet = inches / 144
-	m.inches = inches % 144
+	m.feet = int(inches) / 144
+	m.inches = int(inches) % 144
 	return m
 }
 
-func (m measurement) totalInches() int {
-	return 12*m.feet + m.inches
+func (m measurement) totalInches() distance {
+	return distance(12*m.feet + m.inches)
 }
 
 type roomSize struct {
@@ -65,8 +68,8 @@ func (r roomSize) String() string {
 	return fmt.Sprintf("[ %s %s ]", r.width, r.height)
 }
 
-func (r roomSize) size() int {
-	return r.height.totalInches() * r.width.totalInches()
+func (r roomSize) size() area {
+	return area(r.height.totalInches() * r.width.totalInches())
 }
 
 func parseLine(line string) (roomSize, error) {
@@ -90,7 +93,7 @@ func parseLine(line string) (roomSize, error) {
 }
 
 func getTotalSize(rooms []roomSize) measurement {
-	totalInches := 0
+	var totalInches area
 	for _, r := range rooms {
 		fmt.Printf("room: %s\n", r)
 		totalInches += r.size()
